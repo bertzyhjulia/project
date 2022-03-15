@@ -17,4 +17,7 @@ export class AppService {
     const client = await this.clientRepository.create(createDto);
     return await this.clientRepository.save(client);
   }
+  async delete(id: string) {
+    return await this.clientRepository.delete(id);
+  }
 }

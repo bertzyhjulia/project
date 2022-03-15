@@ -1,4 +1,4 @@
-import { Get, Controller, Render, Post, Body } from '@nestjs/common';
+import { Get, Controller, Render, Post, Body, Delete, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import { CreateClientDto } from './client.dto';
 
@@ -18,5 +18,11 @@ export class AppController {
   async createClient(@Body() createDto: CreateClientDto) {
     const createClient = await this.appService.createClient(createDto);
     return { createClient };
+  }
+
+  @Delete('/delete:id')
+  @Render('index')
+  async deleteClient(@Param('id') id: string) {
+    return await this.appService.delete(id);
   }
 }

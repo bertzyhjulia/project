@@ -1,5 +1,6 @@
-import { Get, Controller, Render } from '@nestjs/common';
+import { Get, Controller, Render, Post, Body } from '@nestjs/common';
 import { AppService } from './app.service';
+import { CreateClientDto } from './client.dto';
 
 @Controller()
 export class AppController {
@@ -10,5 +11,12 @@ export class AppController {
   async get() {
     const result = await this.appService.get10Client();
     return { result };
+  }
+
+  @Post('/clientAdd')
+  @Render('index')
+  async createClient(@Body() createDto: CreateClientDto) {
+    const createClient = await this.appService.createClient(createDto);
+    return { createClient };
   }
 }

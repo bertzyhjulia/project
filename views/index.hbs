@@ -93,7 +93,7 @@
           <button class="edit_button btn btn-outline-primary text mt-2"  data-bs-toggle="modal" data-bs-target="#editModal" id= {{id}}>   edit client  </button>
           <br><br>
 <!-- кнопка delete -->
-          <button class="delete_button btn btn-outline-danger text " id="">  delete client  </button> 
+          <button class="delete_button btn btn-outline-danger text " id="{{id}}">  delete client  </button> 
         </div>
       </div>
     </div>
@@ -157,6 +157,35 @@
     </div>
   </div>
 
+<script>
+  document.getElementById('submit').addEventListener('click', function (e) {
+  e.preventDefault();
+  let registerForm = document.forms['addClient'];
+  let name = registerForm.elements['name'].value;
+  let lastName = registerForm.elements['lastName'].value;
+  let tel = registerForm.elements['tel'].value;
+  let email = registerForm.elements['email'].value;
+  let date = registerForm.elements['date'].value;
+  let avatar = registerForm.elements['avatar'].value;
+  let client = JSON.stringify({
+    name: name,
+    lastName: lastName,
+    tel: tel,
+    email: email,
+    date: date,
+    avatar: avatar,
+  });
+  let request = new XMLHttpRequest();
+  request.open('POST', '/clientAdd', true);
+  request.setRequestHeader('Content-Type', 'application/json');
+  request.send(client);
+  var inputs = document.querySelectorAll('input');
+
+  for (var i = 0; i < inputs.length; i++) {
+    inputs[i].value = '';
+  }
+});
+</script>
 <!-- jQuery -->
 <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>

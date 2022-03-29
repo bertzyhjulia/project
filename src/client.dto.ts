@@ -57,6 +57,16 @@ export class FilterDto {
     default: '',
   })
   readonly date: Date;
+  @ApiProperty({
+    required: false,
+    default: '',
+  })
+  readonly limit: number;
+  @ApiProperty({
+    required: false,
+    default: '',
+  })
+  readonly page: number;
 }
 export class PaginatedClient<Client> {
   @ApiProperty()

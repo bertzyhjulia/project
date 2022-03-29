@@ -55,7 +55,7 @@ fetch("filter", {
               method: "POST",
               body: data_body,   
               headers:{"content-type": "application/x-www-form-urlencoded"} 
-              })
+              
               
               .then( (response) => {
                       if (response.status !== 200) {           
@@ -70,7 +70,7 @@ fetch("filter", {
             for (var i = 0;  i < inputs.length; i++) {
               inputs[i].value = '';
             };
-         });
+          });
          function filter1(){
   
           let registerForm = document.forms["filterClient"];
@@ -202,7 +202,7 @@ fetch("filter", {
                     let client = JSON.stringify({ id: i });
                       let request = new XMLHttpRequest();
                       let test = `?page=`+i+`&limit=`+getLimit()+`&sortBy=id:ASC&`;
-                      request.open('GET', '/paginate'+test, true);
+                      request.open('GET', '/'+test, true);
                       request.setRequestHeader('Content-Type', 'application/json');
                       request.send(client);
                       request.onload = function(){

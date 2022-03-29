@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import { from, map, Observable } from 'rxjs';
 import { Like, Repository } from 'typeorm';
 import { CreateClientDto, FilterDto } from './client.dto';
 import { Client } from './entity/client.entity';
@@ -19,25 +21,77 @@ export class AppService {
   }
 
   async getFiltering(filter: FilterDto) {
-    return await this.clientRepository.find({
-      order: { id: 'ASC' },
-      select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-      skip: 0,
-      where: [
-        {
-          name: Like(`%${filter.name}%`),
-          lastName: Like(`%${filter.lastName}%`),
-          email: Like(`%${filter.email}%`),
-          tel: Like(`%${filter.tel}%`),
-          date: Like(`%${filter.date}%`),
-        },
-      ],
-    });
+    let res;
+    if (filter.name)
+      res = await this.clientRepository.find({
+        order: { id: 'ASC' },
+        select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
+        skip: (filter.page - 1) * filter.limit || 0,
+        take: filter.limit || 5,
+        where: [
+          {
+            name: Like(`%${filter.name}%`),
+          },
+        ],
+      });
+    if (filter.lastName)
+      res = await this.clientRepository.find({
+        order: { id: 'ASC' },
+        select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
+        skip: filter.page * filter.limit,
+        where: [
+          {
+            lastName: Like(`%${filter.lastName}%`),
+          },
+        ],
+      });
+    if (filter.email)
+      res = await this.clientRepository.find({
+        order: { id: 'ASC' },
+        select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
+        skip: filter.page * filter.limit,
+        where: [
+          {
+            email: Like(`%${filter.email}%`),
+          },
+        ],
+      });
+    if (filter.tel)
+      res = await this.clientRepository.find({
+        order: { id: 'ASC' },
+        select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
+        skip: filter.page * filter.limit,
+        where: [
+          {
+            tel: Like(`%${filter.tel}%`),
+          },
+        ],
+      });
+    if (filter.date)
+      res = await this.clientRepository.find({
+        order: { id: 'ASC' },
+        select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
+        skip: filter.page * filter.limit,
+        where: [
+          {
+            date: Like(`%${filter.date}%`),
+          },
+        ],
+      });
+    return res;
   }
 
   public findAll(query: PaginateQuery): Promise<Paginated<Client>> {
     return paginate(query, this.clientRepository, {
-      sortableColumns: ['id', 'name', 'lastName', 'tel', 'email', 'date', 'avatar'],
+      sortableColumns: [
+        'id',
+        'name',
+        'lastName',
+        'tel',
+        'email',
+        'date',
+        'avatar',
+      ],
       searchableColumns: ['name', 'lastName', 'tel', 'email', 'date', 'avatar'],
       defaultSortBy: [['id', 'ASC']],
       filterableColumns: {
@@ -56,11 +110,8 @@ export class AppService {
   }
   async getOne(id: string) {
     return await this.clientRepository.findOne(id);
-
   }
   async delete(id: string) {
     return await this.clientRepository.delete(id);
   }
-
-
 }

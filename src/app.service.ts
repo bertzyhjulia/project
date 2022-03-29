@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
-import { from, map, Observable } from 'rxjs';
 import { Like, Repository } from 'typeorm';
 import { CreateClientDto, FilterDto } from './client.dto';
 import { Client } from './entity/client.entity';
@@ -105,7 +103,7 @@ export class AppService {
     return await this.clientRepository.save(client);
   }
 
-  async addAvatarClient(createDto: CreateClientDto) {
+  async edit(createDto: CreateClientDto) {
     return await this.clientRepository.save(createDto);
   }
   async getOne(id: string) {

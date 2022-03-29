@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -68,13 +69,22 @@ export class AppController {
     return { createClient };
   }
 
-  // @Get('/getEditCient:id')
-  // async getInfoToEdit(@Res() res: Response, @Param('id') id: string) {
-  //   return res.render(
-  //     this.appService.getInfoForEditClient(id),
-  //     { ids: '5'}
-  //   );
-  // }
+  @ApiProperty()
+  @Patch('/clientEdit/:id')
+  @Render('')
+  async editClient(
+    @Param('id') id: string,
+    @Body() { name, lastName, tel, email, date },
+  ) {
+    const client = await this.appService.getOne(id);
+    client.name = name;
+    client.lastName = lastName;
+    client.tel = tel;
+    client.email = email;
+    client.date = date;
+    const editClient = await this.appService.edit(client);
+    return { editClient };
+  }
 
   @ApiProperty()
   @Delete('/delete:id')
@@ -93,7 +103,6 @@ export class AppController {
           const filename: string =
             path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
           const extension: string = path.parse(file.originalname).ext;
-
           cb(null, `${filename}${extension}`);
         },
       }),
@@ -105,8 +114,7 @@ export class AppController {
   ) {
     const createClient = await this.appService.createClient(createDto);
     createClient.avatar = file.path;
-    const avatarClient = await this.appService.addAvatarClient(createClient);
-
+    const avatarClient = await this.appService.edit(createClient);
     return {
       avatarClient,
     };

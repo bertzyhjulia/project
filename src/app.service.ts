@@ -36,7 +36,8 @@ export class AppService {
       res = await this.clientRepository.find({
         order: { id: 'ASC' },
         select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-        skip: filter.page * filter.limit,
+        skip: (filter.page - 1) * filter.limit || 0,
+        take: filter.limit || 5,
         where: [
           {
             lastName: Like(`%${filter.lastName}%`),
@@ -47,7 +48,8 @@ export class AppService {
       res = await this.clientRepository.find({
         order: { id: 'ASC' },
         select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-        skip: filter.page * filter.limit,
+        skip: (filter.page - 1) * filter.limit || 0,
+        take: filter.limit || 5,
         where: [
           {
             email: Like(`%${filter.email}%`),
@@ -58,7 +60,8 @@ export class AppService {
       res = await this.clientRepository.find({
         order: { id: 'ASC' },
         select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-        skip: filter.page * filter.limit,
+        skip: (filter.page - 1) * filter.limit || 0,
+        take: filter.limit || 5,
         where: [
           {
             tel: Like(`%${filter.tel}%`),
@@ -69,7 +72,8 @@ export class AppService {
       res = await this.clientRepository.find({
         order: { id: 'ASC' },
         select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-        skip: filter.page * filter.limit,
+        skip: (filter.page - 1) * filter.limit || 0,
+        take: filter.limit || 5,
         where: [
           {
             date: Like(`%${filter.date}%`),
@@ -99,8 +103,7 @@ export class AppService {
   }
 
   async createClient(createDto: CreateClientDto) {
-    const client = await this.clientRepository.create(createDto);
-    return await this.clientRepository.save(client);
+    return await this.clientRepository.create(createDto);
   }
 
   async edit(createDto: CreateClientDto) {

@@ -19,6 +19,18 @@ import path = require('path');
 import { AppService } from './app.service';
 import { CreateClientDto, FilterDto } from './client.dto';
 import { v4 as uuidv4 } from 'uuid';
+
+export const storage = {
+  storage: diskStorage({
+    destination: 'dist/uploads/profileimagies',
+    filename: (req, file, cb) => {
+      const filename: string =
+        path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+      const extension: string = path.parse(file.originalname).ext;
+      cb(null, `${filename}${extension}`);
+    },
+  }),
+};
 @ApiTags('/swagger')
 @Controller()
 export class AppController {
@@ -62,14 +74,6 @@ export class AppController {
   }
 
   @ApiProperty()
-  @Post('/clientAdd')
-  @Render('')
-  async createClient(@Body() createDto: CreateClientDto) {
-    const createClient = await this.appService.createClient(createDto);
-    return { createClient };
-  }
-
-  @ApiProperty()
   @Patch('/clientEdit/:id')
   @Render('')
   async editClient(
@@ -94,29 +98,34 @@ export class AppController {
   }
 
   @ApiProperty()
-  @Post('upload')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: 'uploads/profileimagies',
-        filename: (req, file, cb) => {
-          const filename: string =
-            path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
-          const extension: string = path.parse(file.originalname).ext;
-          cb(null, `${filename}${extension}`);
-        },
-      }),
-    }),
-  )
+  @Post('clientAdd')
+  @UseInterceptors(FileInterceptor('avatar', storage))
   async uploadFile(
     @Body() createDto: CreateClientDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() avatar: Express.Multer.File,
   ) {
     const createClient = await this.appService.createClient(createDto);
-    createClient.avatar = file.path;
-    const avatarClient = await this.appService.edit(createClient);
-    return {
-      avatarClient,
-    };
+    createClient.avatar = avatar.path;
+    const newClient = await this.appService.edit(createClient);
+    return { newClient };
+  }
+
+  @ApiProperty()
+  @Patch('edit/:id')
+  @UseInterceptors(FileInterceptor('avatar', storage))
+  async uploadFile1(
+    @Param('id') id: string,
+    @Body() { name, lastName, tel, email, date },
+    @UploadedFile() avatar: Express.Multer.File,
+  ) {
+    const client = await this.appService.getOne(id);
+    client.name = name;
+    client.lastName = lastName;
+    client.tel = tel;
+    client.email = email;
+    client.date = date;
+    client.avatar = avatar.path;
+    const editClient = await this.appService.edit(client);
+    return { editClient };
   }
 }

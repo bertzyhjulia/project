@@ -12,8 +12,8 @@ export class CreateClientDto {
   @ApiProperty()
   readonly date: number;
   @ApiProperty({
-    required: false,
-    default: '',
+    nullable: true,
+    default: null,
   })
   readonly avatar: string;
 }

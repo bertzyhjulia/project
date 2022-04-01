@@ -1,0 +1,35 @@
+<div id='result'>
+  {{#each result.data}}
+    <div class='card border-primary mb-2'>
+      <div class='row'>
+        <div class='col-md-3 text'>
+          <img src='{{avatar}}' alt='' width='250' height='250' />
+        </div>
+
+        <div class='col-md-3 mt-5'>
+          <div class='text-default text mt-4'>{{name}} {{lastName}} </div>
+          <div class='text-default text mt-3'>{{date}}</div>
+        </div>
+        <div class='col-md-3 mt-5'>
+          <div class='text-default text mt-4'>{{email}}</div>
+          <div class='text-default text mt-3'>{{tel}}</div>
+        </div>
+        {{! !!!!!!!!!!BUTTONS!!!!!!!!!!!! }}
+        <!-- кнопка редагувати -->
+        <div class='col-md-3 mt-5'>
+          <button
+            class='edit_button btn btn-outline-primary text mt-2'
+            data-bs-toggle='modal'
+            data-bs-target='#editModal'
+            id={{id}}
+          > edit client </button>
+          <br /><br />
+          <!-- кнопка delete -->
+          <button class='delete_button btn btn-outline-danger text' id='{{id}}'>
+            delete client
+          </button>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</div>

@@ -38,7 +38,7 @@ export class AppController {
 
   @ApiProperty()
   @Get('/')
-  @Render('index')
+  @Render('page/index')
   async paginatePage(@Paginate() query: PaginateQuery) {
     const result = await this.appService.findAll(query);
     return { result };
@@ -46,7 +46,7 @@ export class AppController {
 
   @ApiProperty()
   @Get('/count')
-  @Render('')
+  @Render('page/index')
   async getCount() {
     const count = await this.appService.getCountClient();
     console.log(count);

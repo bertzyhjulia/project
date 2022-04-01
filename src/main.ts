@@ -3,6 +3,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'path';
 import { AppModule } from './app.module';
+import * as hbs from 'hbs';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -13,12 +14,14 @@ async function bootstrap() {
     .addTag('todo')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
 
+  SwaggerModule.setup('swagger', app, document);
+  app.enableCors();
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
+  hbs.registerPartials(join(__dirname, '..', 'views/partials'));
+  hbs.registerPartials(join(__dirname, '..', 'views/layout'));
   app.setViewEngine('hbs');
-
   await app.listen(3000);
 }
 bootstrap();

@@ -14,16 +14,38 @@
 {{> modalClientAdd}}
 
 {{> filterClient}}
-      <div id="result">
+
 {{> card}}
-      </div>
 
 {{> modalEditClient}}
 
 {{> pagination}}
   </div>
  <script>
+   //ADD-CLIENT
+document.getElementById('submit').addEventListener('click', function (e) {
+  e.preventDefault();
+  addClient();
+});
+document.getElementById('limit').addEventListener('change', function (e) {
+  e.preventDefault();
+  paginButtons();
+});
+ document.getElementById('filter').addEventListener('click', function (e) {
+  e.preventDefault();
+  filtering()
+});
+window.onload = function () {
+  paginButtons();
+};
+
+
+
+
+
+
   function getCargs(result) {
+    console.log()
   let cards = '';
   console.log(result);
   for (let i = 0; i < result.length; i++) {
@@ -71,10 +93,12 @@
   let l = document.getElementById('result');
   l.innerHTML = cards;
 }
+
+
+
+
 //SCRIPT PAGINATE
-window.onload = function () {
-  paginButtons();
-};
+
 
 function paginButtons() {
   let request = new XMLHttpRequest();
@@ -113,9 +137,6 @@ function getPagin(i) {
   let request = new XMLHttpRequest();
   let test = `?page=` + i + `&limit=` + getLimit() + `&sortBy=id:ASC&`;
   sendPagin(test);
-}
-
-function sendPagin(test) {
   request.open('GET', '/', true);
   request.setRequestHeader('Content-Type', 'application/json');
   request.send(client);
@@ -128,10 +149,30 @@ function sendPagin(test) {
   };
 }
 
-document.getElementById('limit').addEventListener('change', function (e) {
-  e.preventDefault();
-  paginButtons();
-});
+
+
+
+
+ function filtering() {
+  let registerForm = document.forms['filterClient'];
+  let name = registerForm.elements['name'].value;
+  let lastName = registerForm.elements['lastName'].value;
+  let tel = registerForm.elements['tel'].value;
+  let email = registerForm.elements['email'].value;
+  let date = registerForm.elements['date'].value;
+  let path = `?name=` + name + `&`+`lastName=` + lastName + `&`+`email=` + email + `&`+`tel=` + tel + `&`+`date=` + date + `&`+ `page=` + 1 + `&limit=` + getLimit();
+  console.log(path)
+  let request = new XMLHttpRequest();
+  request.open('GET', '/filter' + path, true);
+  request.setRequestHeader('Content-Type', 'application/json');
+  request.send(path);
+  request.onload = function(){
+    let res = JSON.parse(request.response);
+    getCargs(res.result)
+  }
+
+}
+
 
 // SCRIPT DELETE
 var del = document.getElementsByClassName('delete_button');
@@ -148,44 +189,6 @@ for (var i = 0; i < del.length; i++)
       filtering();
     };
   };
-
-function filtering() {
-  let registerForm = document.forms['filterClient'];
-  let name = registerForm.elements['name'].value;
-  let lastName = registerForm.elements['lastName'].value;
-  let tel = registerForm.elements['tel'].value;
-  let email = registerForm.elements['email'].value;
-  let date = registerForm.elements['date'].value;
-  let client = JSON.stringify({
-    name: name,
-    lastName: lastName,
-    tel: tel,
-    email: email,
-    date: date,
-  });
-  console.log(i);
-  let path;
-  if (name != '')
-    path = `?name=` + name + `&page=` + i + `&limit=` + getLimit();
-  if (lastName != '')
-    path = `&lastName=` + lastName + `&page=` + i + `&limit=` + getLimit();
-  if (email != '')
-    path = `&email=` + email + `&page=` + i + `&limit=` + getLimit();
-  if (tel != '') path = `&tel=` + tel + `&page=` + i + `&limit=` + getLimit();
-  if (date != '')
-    path = `&date=` + date + `&page=` + i + `&limit=` + getLimit();
-  let request = new XMLHttpRequest();
-  request.open('GET', '/filter' + path, true);
-  request.setRequestHeader('Content-Type', 'application/json');
-  request.send(client);
-  request.onload = function a() {
-    console.log(request.response);
-    let res = $.parseJSON(request.response);
-    console.log(res.result);
-    getCargs(res.result);
-  };
-}
-
 function delete1(id1) {
   alert('Do you want to delete this client?');
   let client = JSON.stringify({ id: id1 });
@@ -205,23 +208,25 @@ for (var i = 0; i < get.length; i++)
     let client = JSON.stringify({ id: this.id });
     let request = new XMLHttpRequest();
   };
+ //////////////////////////////////////////////////////////////////////////////
 
-document.getElementById('submit').addEventListener('click', function (e) {
-  e.preventDefault();
+
+
+function addClient(){
   let registerForm = document.forms['addClient'];
   let name = registerForm.elements['name'].value;
   let lastName = registerForm.elements['lastName'].value;
   let tel = registerForm.elements['tel'].value;
   let email = registerForm.elements['email'].value;
   let date = registerForm.elements['date'].value;
-  let avatar = registerForm.elements['avatar'].value;
+  var input = document.getElementById('img');
   let data = new FormData();
   data.append('name', name);
   data.append('lastName', lastName);
   data.append('tel', tel);
   data.append('email', email);
   data.append('date', date);
-  data.append('avatar', avatar);
+  data.append('avatar', input.files[0]);
   let data_body =
     '&name=' +
     name +
@@ -232,12 +237,11 @@ document.getElementById('submit').addEventListener('click', function (e) {
     '&email=' +
     email +
     '&date=' +
-    date +
-    '&avatar=' +
-    avatar;
+    date;
+    console.log('data '+ data)
   fetch('clientAdd', {
     method: 'POST',
-    body: data_body,
+    body: data,
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
   })
     .then((response) => {
@@ -252,7 +256,8 @@ document.getElementById('submit').addEventListener('click', function (e) {
   for (var i = 0; i < inputs.length; i++) {
     inputs[i].value = '';
   }
-});
+}
+
 </script>
 <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>

@@ -20,66 +20,81 @@ export class AppService {
 
   async getFiltering(filter: FilterDto) {
     let res;
-    if (filter.name)
+    if (
+      filter.name ||
+      filter.date ||
+      filter.email ||
+      filter.lastName ||
+      filter.tel
+    ) {
+      if (filter.name)
+        res = await this.clientRepository.find({
+          order: { id: 'ASC' },
+          select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
+          skip: (filter.page - 1) * filter.limit || 0,
+          take: filter.limit || 5,
+          where: [
+            {
+              name: Like(`%${filter.name}%`),
+            },
+          ],
+        });
+      if (filter.lastName)
+        res = await this.clientRepository.find({
+          order: { id: 'ASC' },
+          select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
+          skip: (filter.page - 1) * filter.limit || 0,
+          take: filter.limit || 5,
+          where: [
+            {
+              lastName: Like(`%${filter.lastName}%`),
+            },
+          ],
+        });
+      if (filter.email)
+        res = await this.clientRepository.find({
+          order: { id: 'ASC' },
+          select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
+          skip: (filter.page - 1) * filter.limit || 0,
+          take: filter.limit || 5,
+          where: [
+            {
+              email: Like(`%${filter.email}%`),
+            },
+          ],
+        });
+      if (filter.tel)
+        res = await this.clientRepository.find({
+          order: { id: 'ASC' },
+          select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
+          skip: (filter.page - 1) * filter.limit || 0,
+          take: filter.limit || 5,
+          where: [
+            {
+              tel: Like(`%${filter.tel}%`),
+            },
+          ],
+        });
+      if (filter.date)
+        res = await this.clientRepository.find({
+          order: { id: 'ASC' },
+          select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
+          skip: (filter.page - 1) * filter.limit || 0,
+          take: filter.limit || 5,
+          where: [
+            {
+              date: Like(`%${filter.date}%`),
+            },
+          ],
+        });
+    } else {
       res = await this.clientRepository.find({
         order: { id: 'ASC' },
         select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
         skip: (filter.page - 1) * filter.limit || 0,
         take: filter.limit || 5,
-        where: [
-          {
-            name: Like(`%${filter.name}%`),
-          },
-        ],
       });
-    if (filter.lastName)
-      res = await this.clientRepository.find({
-        order: { id: 'ASC' },
-        select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-        skip: (filter.page - 1) * filter.limit || 0,
-        take: filter.limit || 5,
-        where: [
-          {
-            lastName: Like(`%${filter.lastName}%`),
-          },
-        ],
-      });
-    if (filter.email)
-      res = await this.clientRepository.find({
-        order: { id: 'ASC' },
-        select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-        skip: (filter.page - 1) * filter.limit || 0,
-        take: filter.limit || 5,
-        where: [
-          {
-            email: Like(`%${filter.email}%`),
-          },
-        ],
-      });
-    if (filter.tel)
-      res = await this.clientRepository.find({
-        order: { id: 'ASC' },
-        select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-        skip: (filter.page - 1) * filter.limit || 0,
-        take: filter.limit || 5,
-        where: [
-          {
-            tel: Like(`%${filter.tel}%`),
-          },
-        ],
-      });
-    if (filter.date)
-      res = await this.clientRepository.find({
-        order: { id: 'ASC' },
-        select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-        skip: (filter.page - 1) * filter.limit || 0,
-        take: filter.limit || 5,
-        where: [
-          {
-            date: Like(`%${filter.date}%`),
-          },
-        ],
-      });
+    }
     return res;
   }
 

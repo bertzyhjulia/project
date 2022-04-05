@@ -54,19 +54,9 @@ export class AppController {
   }
 
   @ApiProperty()
-  @Post('/filter')
-  @Render('')
-  async postFilter(@Body() filter: FilterDto) {
-    console.log(filter);
-    const result = await this.appService.getFiltering(filter);
-    console.log(result);
-    return { result };
-  }
-
-  @ApiProperty()
   @Get('/filter')
   @Render('')
-  async postFilter1(@Query() filter: FilterDto) {
+  async Filter(@Query() filter: FilterDto) {
     console.log(filter);
     const result = await this.appService.getFiltering(filter);
     console.log(result);
@@ -104,6 +94,7 @@ export class AppController {
     @Body() createDto: CreateClientDto,
     @UploadedFile() avatar: Express.Multer.File,
   ) {
+    console.log(avatar + '555');
     const createClient = await this.appService.createClient(createDto);
     createClient.avatar = avatar.path;
     const newClient = await this.appService.edit(createClient);

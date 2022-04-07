@@ -36,7 +36,7 @@ document.getElementById('limit').addEventListener('change', function (e) {
   filtering()
 });
 window.onload = function () {
-  paginButtons();
+  
 };
 
 
@@ -45,9 +45,7 @@ window.onload = function () {
 
 
   function getCargs(result) {
-    console.log()
   let cards = '';
-  console.log(result);
   for (let i = 0; i < result.length; i++) {
     cards +=
       `<div class="card border-primary mb-2">
@@ -100,19 +98,10 @@ window.onload = function () {
 //SCRIPT PAGINATE
 
 
-function paginButtons() {
-  let request = new XMLHttpRequest();
+function paginButtons(length) {
   let limit = getLimit();
-  let test = `?page=1&limit=` + limit + `&sortBy=id:ASC`;
-  request.open('GET', '/count', true);
-  request.setRequestHeader('Content-Type', 'application/json');
-  request.send(test);
   let button = '';
-  request.onload = function () {
-    console.log(request.response);
-    let count = $.parseJSON(request.response);
-    console.log(count.count);
-    for (let i = 1; i <= Math.ceil(count.count / limit); i++) {
+    for (let i = 1; i <= 5; i++) {
       button +=
         `<li class="page-item col-md-1"><a class="page-link" id="` +
         i +
@@ -124,12 +113,15 @@ function paginButtons() {
     }
     let l = document.getElementById('pagin');
     l.innerHTML = button;
-  };
 }
 
 function getLimit() {
   let limit = document.getElementById('limit');
   return limit.value;
+}
+function getCountOfButtons(length){
+  let count = Math.ceil(length / getLimit())
+  return count;
 }
 
 function getPagin(i) {
@@ -143,9 +135,9 @@ function getPagin(i) {
   request.onload = function () {
     console.log(request.response);
     let res = $.parseJSON(request.response);
-    console.log(res.result);
     let cards = '';
     getCargs(res.result.data);
+    getCountOfButtons(res.result.data.length)
   };
 }
 
@@ -168,9 +160,9 @@ function getPagin(i) {
   request.send(path);
   request.onload = function(){
     let res = JSON.parse(request.response);
-    getCargs(res.result)
+    getCargs(res.result);
+    paginButtons(res.result.length)
   }
-
 }
 
 

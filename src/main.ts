@@ -21,6 +21,7 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   hbs.registerPartials(join(__dirname, '..', 'views/partials'));
   hbs.registerPartials(join(__dirname, '..', 'views/layout'));
+  hbs.registerPartials(join(__dirname, '..', 'upload/profileimagies'));
   app.setViewEngine('hbs');
   await app.listen(3000);
 }

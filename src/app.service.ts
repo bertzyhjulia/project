@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import { from, Observable } from 'rxjs';
 import { Like, Repository } from 'typeorm';
 import { CreateClientDto, FilterDto } from './client.dto';
 import { Client } from './entity/client.entity';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class AppService {
@@ -11,110 +13,92 @@ export class AppService {
     @InjectRepository(Client)
     private clientRepository: Repository<Client>,
   ) {}
-  async getCountClient() {
-    const clients = await this.clientRepository.find();
-    let count = 0;
-    for (let i = 0; i < clients.length; i++) count++;
-    return count;
-  }
 
-  async getFiltering(filter: FilterDto) {
-    let res;
-    if (
-      filter.name ||
-      filter.date ||
-      filter.email ||
-      filter.lastName ||
-      filter.tel
-    ) {
-      if (filter.name)
-        res = await this.clientRepository.find({
-          order: { id: 'ASC' },
-          select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-          skip: (filter.page - 1) * filter.limit || 0,
-          take: filter.limit || 5,
-          where: [
-            {
-              name: Like(`%${filter.name}%`),
-            },
-          ],
-        });
-      if (filter.lastName)
-        res = await this.clientRepository.find({
-          order: { id: 'ASC' },
-          select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-          skip: (filter.page - 1) * filter.limit || 0,
-          take: filter.limit || 5,
-          where: [
-            {
-              lastName: Like(`%${filter.lastName}%`),
-            },
-          ],
-        });
-      if (filter.email)
-        res = await this.clientRepository.find({
-          order: { id: 'ASC' },
-          select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-          skip: (filter.page - 1) * filter.limit || 0,
-          take: filter.limit || 5,
-          where: [
-            {
-              email: Like(`%${filter.email}%`),
-            },
-          ],
-        });
-      if (filter.tel)
-        res = await this.clientRepository.find({
-          order: { id: 'ASC' },
-          select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-          skip: (filter.page - 1) * filter.limit || 0,
-          take: filter.limit || 5,
-          where: [
-            {
-              tel: Like(`%${filter.tel}%`),
-            },
-          ],
-        });
-      if (filter.date)
-        res = await this.clientRepository.find({
-          order: { id: 'ASC' },
-          select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-          skip: (filter.page - 1) * filter.limit || 0,
-          take: filter.limit || 5,
-          where: [
-            {
-              date: Like(`%${filter.date}%`),
-            },
-          ],
-        });
-    } else {
-      res = await this.clientRepository.find({
+  getFiltering(
+    options: IPaginationOptions,
+    filter: FilterDto,
+  ): Observable<Pagination<Client>> {
+    return from(
+      this.clientRepository.findAndCount({
+        skip: Number(options.page) * Number(options.limit) || 0,
+        take: Number(options.limit) || 2,
         order: { id: 'ASC' },
-        select: ['id', 'name', 'lastName', 'email', 'tel', 'date', 'avatar'],
-        skip: (filter.page - 1) * filter.limit || 0,
-        take: filter.limit || 5,
-      });
-    }
-    return res;
+        select: ['id', 'name', 'lastName', 'email'],
+        where: [
+          {
+            name: Like(`%${filter.name}%`),
+            lastName: Like(`%${filter.lastName}%`),
+          },
+        ],
+      }),
+    ).pipe(
+      map(([clients, totalClients]) => {
+        const clientsPageable: Pagination<Client> = {
+          items: clients,
+          links: {
+            first: options.route + `limit=${options.limit}`,
+            previous:
+              options.route +
+              `limit=${options.limit}&page=${Number(options.page) - 1}`,
+            next:
+              options.route +
+              `limit=${options.limit}&page=${Number(options.page) + 1}`,
+            last:
+              options.route +
+              `limit=${options.limit}&page=${Math.ceil(
+                totalClients / Number(options.limit) - 1,
+              )}`,
+          },
+          meta: {
+            currentPage: Number(options.page),
+            itemCount: clients.length,
+            itemsPerPage: Number(options.limit),
+            totalItems: totalClients,
+            totalPages: Math.ceil(totalClients / Number(options.limit)) - 1,
+          },
+        };
+        return clientsPageable;
+      }),
+    );
   }
 
-  public findAll(query: PaginateQuery): Promise<Paginated<Client>> {
-    return paginate(query, this.clientRepository, {
-      sortableColumns: [
-        'id',
-        'name',
-        'lastName',
-        'tel',
-        'email',
-        'date',
-        'avatar',
-      ],
-      searchableColumns: ['name', 'lastName', 'tel', 'email', 'date', 'avatar'],
-      defaultSortBy: [['id', 'ASC']],
-      filterableColumns: {
-        //id: [FilterOperator.GTE, FilterOperator.LTE],
-      },
-    });
+  getAll(options: IPaginationOptions): Observable<Pagination<Client>> {
+    return from(
+      this.clientRepository.findAndCount({
+        skip: Number(options.page) * Number(options.limit) || 0,
+        take: Number(options.limit) || 2,
+        order: { id: 'ASC' },
+        select: ['id', 'name', 'lastName', 'email'],
+      }),
+    ).pipe(
+      map(([clients, totalClients]) => {
+        const clientsPageable: Pagination<Client> = {
+          items: clients,
+          links: {
+            first: options.route + `limit=${options.limit}`,
+            previous:
+              options.route +
+              `limit=${options.limit}&page=${Number(options.page) - 1}`,
+            next:
+              options.route +
+              `limit=${options.limit}&page=${Number(options.page) + 1}`,
+            last:
+              options.route +
+              `limit=${options.limit}&page=${Math.ceil(
+                totalClients / Number(options.limit) - 1,
+              )}`,
+          },
+          meta: {
+            currentPage: Number(options.page),
+            itemCount: clients.length,
+            itemsPerPage: Number(options.limit),
+            totalItems: totalClients,
+            totalPages: Math.ceil(totalClients / Number(options.limit)) - 1,
+          },
+        };
+        return clientsPageable;
+      }),
+    );
   }
 
   async createClient(createDto: CreateClientDto) {

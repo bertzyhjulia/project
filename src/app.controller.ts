@@ -14,10 +14,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiProperty, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
-import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import path = require('path');
 import { AppService } from './app.service';
-import { CreateClientDto, FilterDto } from './client.dto';
+import { CreateClientDto } from './client.dto';
 import { v4 as uuidv4 } from 'uuid';
 
 export const storage = {
@@ -38,29 +37,37 @@ export class AppController {
 
   @ApiProperty()
   @Get('/')
-  @Render('page/index')
-  async paginatePage(@Paginate() query: PaginateQuery) {
-    const result = await this.appService.findAll(query);
-    return { result };
-  }
-
-  @ApiProperty()
-  @Get('/count')
-  @Render('page/index')
-  async getCount() {
-    const count = await this.appService.getCountClient();
-    console.log(count);
-    return { count };
-  }
-
-  @ApiProperty()
-  @Get('/filter')
   @Render('')
-  async Filter(@Query() filter: FilterDto) {
-    console.log(filter);
-    const result = await this.appService.getFiltering(filter);
-    console.log(result);
-    return { result };
+  async Filter(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('name') name: string,
+    @Query('lastName') lastName: string,
+    @Query('email') email: string,
+    @Query('tel') tel: number,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    if (name === null || name === undefined) {
+      return this.appService.getAll({
+        page: Number(page),
+        limit: Number(limit),
+        route: 'http://localhost:3000',
+      });
+    } else {
+      return await this.appService.getFiltering(
+        {
+          page: Number(page),
+          limit: Number(limit),
+          route:
+            `http://localhost:3000/?name=` +
+            name +
+            // `&lastName=` +
+            // lastName +
+            `&`,
+        },
+        { name, lastName, email, tel },
+      );
+    }
   }
 
   @ApiProperty()

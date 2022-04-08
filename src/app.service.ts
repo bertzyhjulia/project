@@ -18,6 +18,7 @@ export class AppService {
     options: IPaginationOptions,
     filter: FilterDto,
   ): Observable<Pagination<Client>> {
+    console.log(options);
     return from(
       this.clientRepository.findAndCount({
         skip: Number(options.page) * Number(options.limit) || 0,
@@ -54,15 +55,17 @@ export class AppService {
             itemCount: clients.length,
             itemsPerPage: Number(options.limit),
             totalItems: totalClients,
-            totalPages: Math.ceil(totalClients / Number(options.limit)) - 1,
+            totalPages: Math.ceil(totalClients / Number(options.limit)),
           },
         };
+        console.log(clientsPageable);
         return clientsPageable;
       }),
     );
   }
 
   getAll(options: IPaginationOptions): Observable<Pagination<Client>> {
+    console.log(options);
     return from(
       this.clientRepository.findAndCount({
         skip: Number(options.page) * Number(options.limit) || 0,
@@ -75,16 +78,16 @@ export class AppService {
         const clientsPageable: Pagination<Client> = {
           items: clients,
           links: {
-            first: options.route + `limit=${options.limit}`,
+            first: options.route + `?limit=${options.limit}`,
             previous:
               options.route +
-              `limit=${options.limit}&page=${Number(options.page) - 1}`,
+              `?limit=${options.limit}&page=${Number(options.page) - 1}`,
             next:
               options.route +
-              `limit=${options.limit}&page=${Number(options.page) + 1}`,
+              `?limit=${options.limit}&page=${Number(options.page) + 1}`,
             last:
               options.route +
-              `limit=${options.limit}&page=${Math.ceil(
+              `?limit=${options.limit}&page=${Math.ceil(
                 totalClients / Number(options.limit) - 1,
               )}`,
           },
@@ -93,7 +96,7 @@ export class AppService {
             itemCount: clients.length,
             itemsPerPage: Number(options.limit),
             totalItems: totalClients,
-            totalPages: Math.ceil(totalClients / Number(options.limit)) - 1,
+            totalPages: Math.ceil(totalClients / Number(options.limit)),
           },
         };
         return clientsPageable;

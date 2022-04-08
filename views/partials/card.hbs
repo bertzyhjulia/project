@@ -1,19 +1,21 @@
-<img src='/../../../img/1.jpg' alt='dtfyguhijokpl[;' />
 <div id='result'>
-  {{#each result.data}}
+  {{#each clientsPageable.items.result}}
+
     <div class='card border-primary mb-2'>
       <div class='row'>
         <div class='col-md-3 text'>
-          <img src='{{avatar}}' width='250' height='250' alt='photo' />
+          <img src='{{Client.avatar}}' width='250' height='250' alt='photo' />
         </div>
 
         <div class='col-md-3 mt-5'>
-          <div class='text-default text mt-4'>{{name}} {{lastName}} </div>
-          <div class='text-default text mt-3'>{{date}}</div>
+          <div class='text-default text mt-4'>{{Client.name}}
+            {{Client.lastName}}
+          </div>
+          <div class='text-default text mt-3'>{{Client.date}}</div>
         </div>
         <div class='col-md-3 mt-5'>
-          <div class='text-default text mt-4'>{{email}}</div>
-          <div class='text-default text mt-3'>{{tel}}</div>
+          <div class='text-default text mt-4'>{{Client.email}}</div>
+          <div class='text-default text mt-3'>{{Client.tel}}</div>
         </div>
         {{! !!!!!!!!!!BUTTONS!!!!!!!!!!!! }}
         <!-- кнопка редагувати -->

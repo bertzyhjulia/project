@@ -37,17 +37,17 @@ export class AppController {
 
   @ApiProperty()
   @Get('/')
-  @Render('')
+  @Render('page/index')
   async Filter(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
+    @Query('page') page = 0,
+    @Query('limit') limit = 5,
     @Query('name') name: string,
     @Query('lastName') lastName: string,
     @Query('email') email: string,
     @Query('tel') tel: number,
   ) {
     limit = limit > 100 ? 100 : limit;
-    if (name === null || name === undefined) {
+    if (name == null || name == undefined) {
       return this.appService.getAll({
         page: Number(page),
         limit: Number(limit),
@@ -59,10 +59,14 @@ export class AppController {
           page: Number(page),
           limit: Number(limit),
           route:
-            `http://localhost:3000/?name=` +
+            `http://localhost:3000?name=` +
             name +
-            // `&lastName=` +
-            // lastName +
+            `&lastName=` +
+            lastName +
+            `&tel=` +
+            lastName +
+            `&email=` +
+            lastName +
             `&`,
         },
         { name, lastName, email, tel },

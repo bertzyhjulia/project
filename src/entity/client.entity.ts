@@ -24,8 +24,8 @@ export class Client {
   tel: number;
 
   @ApiProperty()
-  @Column()
-  date: number;
+  @Column('date', { nullable: true })
+  date: Date;
 
   @ApiProperty()
   @Column()

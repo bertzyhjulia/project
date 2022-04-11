@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
-import { from, Observable } from 'rxjs';
+import { from } from 'rxjs';
 import { Like, Repository } from 'typeorm';
 import { CreateClientDto, FilterDto } from './client.dto';
 import { Client } from './entity/client.entity';
@@ -14,17 +14,14 @@ export class AppService {
     private clientRepository: Repository<Client>,
   ) {}
 
-  getFiltering(
-    options: IPaginationOptions,
-    filter: FilterDto,
-  ): Observable<Pagination<Client>> {
+  getFiltering(options: IPaginationOptions, filter: FilterDto) {
     console.log(options);
     return from(
       this.clientRepository.findAndCount({
         skip: Number(options.page) * Number(options.limit) || 0,
         take: Number(options.limit) || 2,
         order: { id: 'ASC' },
-        select: ['id', 'name', 'lastName', 'email'],
+        select: ['id', 'name', 'lastName', 'email', 'date', 'tel', 'avatar'],
         where: [
           {
             name: Like(`%${filter.name}%`),
@@ -59,19 +56,19 @@ export class AppService {
           },
         };
         console.log(clientsPageable);
-        return clientsPageable;
+        return { clientsPageable };
       }),
     );
   }
 
-  getAll(options: IPaginationOptions): Observable<Pagination<Client>> {
+  getAll(options: IPaginationOptions) {
     console.log(options);
     return from(
       this.clientRepository.findAndCount({
         skip: Number(options.page) * Number(options.limit) || 0,
         take: Number(options.limit) || 2,
         order: { id: 'ASC' },
-        select: ['id', 'name', 'lastName', 'email'],
+        select: ['id', 'name', 'lastName', 'email', 'date', 'tel', 'avatar'],
       }),
     ).pipe(
       map(([clients, totalClients]) => {
@@ -99,7 +96,8 @@ export class AppService {
             totalPages: Math.ceil(totalClients / Number(options.limit)),
           },
         };
-        return clientsPageable;
+        console.log(clientsPageable);
+        return { clientsPageable };
       }),
     );
   }

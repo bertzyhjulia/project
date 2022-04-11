@@ -1,34 +1,44 @@
 <div id='result'>
-  {{#each clientsPageable.items.result}}
+  {{#each clientsPageable.items}}
 
     <div class='card border-primary mb-2'>
       <div class='row'>
         <div class='col-md-3 text'>
-          <img src='{{Client.avatar}}' width='250' height='250' alt='photo' />
+
+          <img
+            src='http://localhost:3000/profileimagies/{{avatar}}'
+            style='width: 150px; height: 150px; object-fit: cover;'
+            class='rounded'
+          />
         </div>
 
-        <div class='col-md-3 mt-5'>
-          <div class='text-default text mt-4'>{{Client.name}}
-            {{Client.lastName}}
+        <div class='col-md-3 mt-3'>
+          <div class='text-default text mt-3'>{{name}}
+            {{lastName}}
           </div>
-          <div class='text-default text mt-3'>{{Client.date}}</div>
+          <div class='text-default text mt-2'>{{date}}</div>
         </div>
-        <div class='col-md-3 mt-5'>
-          <div class='text-default text mt-4'>{{Client.email}}</div>
-          <div class='text-default text mt-3'>{{Client.tel}}</div>
+        <div class='col-md-3 mt-3'>
+          <div class='text-default text mt-3'>{{email}}</div>
+          <div class='text-default text mt-2'>+380{{tel}}</div>
         </div>
         {{! !!!!!!!!!!BUTTONS!!!!!!!!!!!! }}
         <!-- кнопка редагувати -->
-        <div class='col-md-3 mt-5'>
+        <div class='col-md-3 mt-3'>
           <button
             class='edit_button btn btn-outline-primary text mt-2'
             data-bs-toggle='modal'
             data-bs-target='#editModal'
+            style='width: 130px;'
             id={{id}}
           > edit client </button>
           <br /><br />
           <!-- кнопка delete -->
-          <button class='delete_button btn btn-outline-danger text' id='{{id}}'>
+          <button
+            class='delete_button btn btn-outline-danger text'
+            id='{{id}}'
+            style='width: 130px;'
+          >
             delete client
           </button>
         </div>
@@ -36,3 +46,10 @@
     </div>
   {{/each}}
 </div>
+<script>
+  function getImg(avatar){ let request = new XMLHttpRequest();
+  request.open('GET', '/profileimagies/' + avatar, true);
+  request.setRequestHeader('Content-Type', 'application/json');
+  request.send(avatar); request.onload = function () {
+  console.log(request.response); }; }
+</script>

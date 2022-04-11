@@ -44,49 +44,66 @@ window.onload = function () {
 
 
 
-  function getCargs(result) {
+  function getCargs(items) {
+    console.log('sxdctfvygbuhnijmk,cfvghbjnkmk,'+ items)
   let cards = '';
-  for (let i = 0; i < result.length; i++) {
+  for (let i = 0; i < items.length; i++) {
     cards +=
-      `<div class="card border-primary mb-2">
-          <div class="row">
-            <div class="col-md-3 text  ">
-              <img src="` +
-      result[i].avatar +
-      `" alt="" width="250" height="250">
-            </div>
+      ` <div class='card border-primary mb-2'>
+      <div class='row'>
+        <div class='col-md-3 text'>
+
+          <img
+            src='http://localhost:3000/profileimagies/`+ items[i].avatar +
+      `'
+            style='width: 150px; height: 150px; object-fit: cover;'
+            class='rounded'
+          />
+        </div>
             
-            <div class="col-md-3 mt-5">
-              <div class="text-default text mt-4">` +
-      result[i].name +
+            <div class='col-md-3 mt-3'>
+          <div class='text-default text mt-3'>` +
+      items[i].name +
       ` ` +
-      result[i].lastName +
-      `</div>
-              <div class="text-default text mt-3">` +
-      result[i].date +
-      `</div>
-            </div>
-            <div class="col-md-3 mt-5">
-              <div class="text-default text mt-4">` +
-      result[i].email +
-      `</div>
-              <div class="text-default text mt-3">` +
-      result[i].tel +
-      `</div>
-            </div>
-    <!-- кнопка редагувати -->
-          <div class="col-md-3 mt-5">
-              <button class="edit_button btn btn-outline-primary text mt-2"  data-bs-toggle="modal" data-bs-target="#editModal" id= {{id}}>   edit client  </button>
-              <br><br>
-    <!-- кнопка delete -->
-              <button class="delete_button btn btn-outline-danger text " id="` +
-      result[i].id +
-      `" onclick="delete1(` +
-      result[i].id +
-      `)">  delete client  </button> 
-            </div>
+      items[i].lastName +
+      `
           </div>
-        </div>`;
+          <div class='text-default text mt-2'>` +
+      items[i].date +
+      `</div>
+        </div>
+         <div class='col-md-3 mt-3'>
+          <div class='text-default text mt-3'>` +
+      items[i].email +
+      `</div>
+          <div class='text-default text mt-2'>+380` +
+      items[i].tel +
+      `</div>
+        </div>
+<div class='col-md-3 mt-3'>
+          <button
+            class='edit_button btn btn-outline-primary text mt-2'
+            data-bs-toggle='modal'
+            data-bs-target='#editModal'
+            style='width: 130px;'
+            id={{id}}
+          > edit client </button>
+          <br /><br />
+          <!-- кнопка delete -->
+          <button
+            class='delete_button btn btn-outline-danger text'
+            id='` +
+      items[i].id +
+      `" onclick="delete1(` +
+      items[i].id +
+      `)">'
+            style='width: 130px;'
+          >
+            delete client
+          </button>
+        </div>
+      </div>
+    </div>`
   }
   let l = document.getElementById('result');
   l.innerHTML = cards;
@@ -101,7 +118,7 @@ window.onload = function () {
 function paginButtons(length) {
   let limit = getLimit();
   let button = '';
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= length; i++) {
       button +=
         `<li class="page-item col-md-1"><a class="page-link" id="` +
         i +
@@ -119,10 +136,6 @@ function getLimit() {
   let limit = document.getElementById('limit');
   return limit.value;
 }
-function getCountOfButtons(length){
-  let count = Math.ceil(length / getLimit())
-  return count;
-}
 
 function getPagin(i) {
   let client = JSON.stringify({ id: i });
@@ -137,7 +150,7 @@ function getPagin(i) {
     let res = $.parseJSON(request.response);
     let cards = '';
     getCargs(res.result.data);
-    getCountOfButtons(res.result.data.length)
+    getCountOfButtons(res.result)
   };
 }
 
@@ -152,18 +165,23 @@ function getPagin(i) {
   let tel = registerForm.elements['tel'].value;
   let email = registerForm.elements['email'].value;
   let date = registerForm.elements['date'].value;
+  console.log(date);
   let path = `?name=` + name + `&`+`lastName=` + lastName + `&`+`email=` + email + `&`+`tel=` + tel + `&`+`date=` + date + `&`+ `page=` + 0 + `&limit=` + getLimit();
   console.log(path)
   let request = new XMLHttpRequest();
-  request.open('GET', '/' + path, true);
+  request.open('GET', '/paginate' + path, true);
   request.setRequestHeader('Content-Type', 'application/json');
   request.send(path);
   request.onload = function(){
-    console.log(request.responseText.limit)
-    let res = JSON.parse(request.response.items);
-    console.log(res.items)
-    getCargs(res.result);
-    paginButtons(res.result.length)
+    //document.open();
+    //document.write(request.response);
+    //document.close();
+    console.log(request.response.clientsPageable)
+    let res = JSON.parse(request.response)
+    console.log(res.clientsPageable)
+    getCargs(res.clientsPageable.items);
+    console.log(res.clientsPageable.meta.totalPages)
+    paginButtons(res.clientsPageable.meta.totalPages)
   }
 }
 
@@ -183,6 +201,7 @@ for (var i = 0; i < del.length; i++)
       filtering();
     };
   };
+  
 function delete1(id1) {
   alert('Do you want to delete this client?');
   let client = JSON.stringify({ id: id1 });
@@ -236,6 +255,7 @@ function addClient(){
   fetch('clientAdd', {
     method: 'POST',
     body: data,
+    contentType: 'multipart/form-data',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
   })
     .then((response) => {

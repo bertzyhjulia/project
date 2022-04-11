@@ -10,7 +10,7 @@ export class CreateClientDto {
   @ApiProperty()
   readonly tel: number;
   @ApiProperty()
-  readonly date: number;
+  readonly date: Date;
   @ApiProperty({
     nullable: true,
     default: null,

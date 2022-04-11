@@ -10,6 +10,7 @@ import {
   UploadedFile,
   Query,
   Patch,
+  Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -18,6 +19,8 @@ import path = require('path');
 import { AppService } from './app.service';
 import { CreateClientDto } from './client.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { of } from 'rxjs';
+import { join } from 'path';
 
 export const storage = {
   storage: diskStorage({
@@ -38,9 +41,16 @@ export class AppController {
   @ApiProperty()
   @Get('/')
   @Render('page/index')
-  async Filter(
+  get() {
+    return this.appService.getAll({ page: 0, limit: 2 });
+  }
+
+  @ApiProperty()
+  @Get('/paginate')
+  @Render('')
+  async getAllOrFiltering(
     @Query('page') page = 0,
-    @Query('limit') limit = 5,
+    @Query('limit') limit = 2,
     @Query('name') name: string,
     @Query('lastName') lastName: string,
     @Query('email') email: string,
@@ -64,9 +74,9 @@ export class AppController {
             `&lastName=` +
             lastName +
             `&tel=` +
-            lastName +
+            tel +
             `&email=` +
-            lastName +
+            email +
             `&`,
         },
         { name, lastName, email, tel },
@@ -107,7 +117,7 @@ export class AppController {
   ) {
     console.log(avatar + '555');
     const createClient = await this.appService.createClient(createDto);
-    createClient.avatar = avatar.path;
+    createClient.avatar = avatar.filename;
     const newClient = await this.appService.edit(createClient);
     return { newClient };
   }
@@ -129,5 +139,15 @@ export class AppController {
     client.avatar = avatar.path;
     const editClient = await this.appService.edit(client);
     return { editClient };
+  }
+
+  @ApiProperty()
+  @Get('profileimagies/:imagename')
+  findProfileImage(@Param('imagename') imagename, @Res() res) {
+    return of(
+      res.sendFile(
+        join(process.cwd(), 'dist/uploads/profileimagies/' + imagename),
+      ),
+    );
   }
 }

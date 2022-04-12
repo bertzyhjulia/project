@@ -42,7 +42,11 @@ export class AppController {
   @Get('/')
   @Render('page/index')
   get() {
-    return this.appService.getAll({ page: 0, limit: 2 });
+    return this.appService.getAll({
+      page: 0,
+      limit: 2,
+      route: 'http://localhost:3000/paginate',
+    });
   }
 
   @ApiProperty()
@@ -55,13 +59,25 @@ export class AppController {
     @Query('lastName') lastName: string,
     @Query('email') email: string,
     @Query('tel') tel: number,
+    @Query('date') date: Date,
   ) {
     limit = limit > 100 ? 100 : limit;
-    if (name == null || name == undefined) {
+    if (
+      name == null ||
+      name == undefined ||
+      lastName == null ||
+      lastName == undefined ||
+      tel == null ||
+      tel == undefined ||
+      date == null ||
+      date == undefined ||
+      email == null ||
+      email == undefined
+    ) {
       return this.appService.getAll({
         page: Number(page),
         limit: Number(limit),
-        route: 'http://localhost:3000',
+        route: 'http://localhost:3000/paginate',
       });
     } else {
       return await this.appService.getFiltering(
@@ -69,7 +85,7 @@ export class AppController {
           page: Number(page),
           limit: Number(limit),
           route:
-            `http://localhost:3000?name=` +
+            `http://localhost:3000/paginate?name=` +
             name +
             `&lastName=` +
             lastName +
@@ -77,9 +93,11 @@ export class AppController {
             tel +
             `&email=` +
             email +
+            `&date=` +
+            date +
             `&`,
         },
-        { name, lastName, email, tel },
+        { name, lastName, email, tel, date },
       );
     }
   }
@@ -116,6 +134,7 @@ export class AppController {
     @UploadedFile() avatar: Express.Multer.File,
   ) {
     console.log(avatar + '555');
+    console.log(createDto)
     const createClient = await this.appService.createClient(createDto);
     createClient.avatar = avatar.filename;
     const newClient = await this.appService.edit(createClient);

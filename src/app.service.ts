@@ -15,7 +15,7 @@ export class AppService {
   ) {}
 
   getFiltering(options: IPaginationOptions, filter: FilterDto) {
-    console.log(options);
+    console.log(options.route);
     return from(
       this.clientRepository.findAndCount({
         skip: Number(options.page) * Number(options.limit) || 0,
@@ -26,6 +26,9 @@ export class AppService {
           {
             name: Like(`%${filter.name}%`),
             lastName: Like(`%${filter.lastName}%`),
+            email: Like(`%${filter.email}%`),
+            tel: Like(`%${filter.tel}%`),
+            date: Like(`%${filter.date}%`),
           },
         ],
       }),
@@ -62,7 +65,7 @@ export class AppService {
   }
 
   getAll(options: IPaginationOptions) {
-    console.log(options);
+    console.log(options.route);
     return from(
       this.clientRepository.findAndCount({
         skip: Number(options.page) * Number(options.limit) || 0,

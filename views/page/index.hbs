@@ -31,12 +31,26 @@ document.getElementById('limit').addEventListener('change', function (e) {
   e.preventDefault();
   paginButtons();
 });
- document.getElementById('filter').addEventListener('click', function (e) {
+document.getElementById('filter').addEventListener('click', function (e) {
   e.preventDefault();
   filtering()
 });
+
 window.onload = function () {
-  
+  var inputs = document.querySelectorAll('input');
+  for (var i = 0; i < inputs.length; i++) {
+    inputs[i].value = '';
+  }
+  let client = '';
+  let request = new XMLHttpRequest();
+  request.open('GET', '/paginate', true);
+  request.setRequestHeader('Content-Type', 'application/json');
+  request.send(client);
+  request.onload = function () {
+    let res = $.parseJSON(request.response);
+    console.log(res.clientsPageable)
+    paginButtons(res.clientsPageable)
+  };
 };
 
 
@@ -96,7 +110,7 @@ window.onload = function () {
       items[i].id +
       `" onclick="delete1(` +
       items[i].id +
-      `)">'
+      `)">
             style='width: 130px;'
           >
             delete client
@@ -114,60 +128,91 @@ window.onload = function () {
 
 //SCRIPT PAGINATE
 
+function getPath (path){
+  //let path = filtering()
+  let newPath = path.split('3000/')[1]
+  let p = newPath.split('limit=')[0]
+  return p;
+}
 
-function paginButtons(length) {
+function paginButtons(pagin) {
+  console.log(pagin)
   let limit = getLimit();
   let button = '';
-    for (let i = 1; i <= length; i++) {
+  let First = '';
+  let Last = '';
+  let path = pagin.links.next;
+  getPath(path);
+  let firstPage = 0;
+  let lastPage = pagin.links.last.split('page=')[1];
+  let buttonPath = pagin.links.next.split('paginate')[1];
+  console.log(lastPage)
+   First += `<button class='page-link' onclick='getPaginRequest(${firstPage})' aria-label='Previous'>
+              <span aria-hidden='true'>&laquo;</span>
+              <span class='sr-only'></span>
+            </button>`
+    console.log(First)
+    let first = document.getElementById('First');
+    first.innerHTML = First;
+    Last += `<button class='page-link' onclick='getPaginRequest(${lastPage})' aria-label='Next'>
+              <span aria-hidden='true'>&raquo;</span>
+              <span class='sr-only'></span>
+            </button>`
+    let last = document.getElementById('Last');
+    last.innerHTML = Last;
+    for (let i = 0; i < pagin.meta.totalPages; i++) {
       button +=
-        `<li class="page-item col-md-1"><a class="page-link" id="` +
-        i +
-        `"  onclick = getPagin(` +
-        i +
-        `) href="#">` +
-        i +
-        `</a></li>`;
+        `<li rel="canonical" class="page-item col-md-1">
+        <button class="page-link mx-1"
+        "  onclick="getPaginRequest(${i})">` +
+        (i+1) +
+        `</button>
+        </li>`;
     }
     let l = document.getElementById('pagin');
     l.innerHTML = button;
+    return path;
+}
+
+
+
+function getPaginRequest(id) {
+  console.log('path' + id)
+  let path = getFilterPath() 
+  path += `limit=`+getLimit()+`&page=`+id
+  let request = new XMLHttpRequest();
+  request.open('GET', '/paginate' + path, true);
+  request.setRequestHeader('Content-Type', 'application/json');
+  request.send(id);
+  request.onload = function(){
+    //document.open();
+    //document.write(request.response);
+    //document.close();
+    let res = JSON.parse(request.response)
+    console.log(res.clientsPageable)
+    getCargs(res.clientsPageable.items);
+  }
 }
 
 function getLimit() {
   let limit = document.getElementById('limit');
   return limit.value;
 }
-
-function getPagin(i) {
-  let client = JSON.stringify({ id: i });
-  let request = new XMLHttpRequest();
-  let test = `?page=` + i + `&limit=` + getLimit() + `&sortBy=id:ASC&`;
-  sendPagin(test);
-  request.open('GET', '/', true);
-  request.setRequestHeader('Content-Type', 'application/json');
-  request.send(client);
-  request.onload = function () {
-    console.log(request.response);
-    let res = $.parseJSON(request.response);
-    let cards = '';
-    getCargs(res.result.data);
-    getCountOfButtons(res.result)
-  };
-}
-
-
-
-
-
- function filtering() {
+function getFilterPath(){
   let registerForm = document.forms['filterClient'];
   let name = registerForm.elements['name'].value;
   let lastName = registerForm.elements['lastName'].value;
   let tel = registerForm.elements['tel'].value;
   let email = registerForm.elements['email'].value;
   let date = registerForm.elements['date'].value;
-  console.log(date);
-  let path = `?name=` + name + `&`+`lastName=` + lastName + `&`+`email=` + email + `&`+`tel=` + tel + `&`+`date=` + date + `&`+ `page=` + 0 + `&limit=` + getLimit();
-  console.log(path)
+  let path = `?name=` + name + `&`+`lastName=` + lastName + `&`+`email=` + email + `&`+`tel=` + tel + `&`+`date=` + date + `&`;
+  return path;
+}
+
+ function filtering() {
+  let path = getFilterPath()
+  path += `page=` + 0 + `&limit=` + getLimit();
+  console.log(path + 'filtering')
   let request = new XMLHttpRequest();
   request.open('GET', '/paginate' + path, true);
   request.setRequestHeader('Content-Type', 'application/json');
@@ -181,7 +226,7 @@ function getPagin(i) {
     console.log(res.clientsPageable)
     getCargs(res.clientsPageable.items);
     console.log(res.clientsPageable.meta.totalPages)
-    paginButtons(res.clientsPageable.meta.totalPages)
+    paginButtons(res.clientsPageable)
   }
 }
 

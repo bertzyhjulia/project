@@ -52,6 +52,7 @@ export class FilterDto {
     default: '',
   })
   readonly tel: number;
+  readonly date: Date;
 }
 export class PaginatedClient<Client> {
   @ApiProperty()

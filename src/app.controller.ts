@@ -21,6 +21,7 @@ import { CreateClientDto } from './client.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { of } from 'rxjs';
 import { join } from 'path';
+import { threadId } from 'worker_threads';
 
 export const storage = {
   storage: diskStorage({
@@ -103,6 +104,14 @@ export class AppController {
   }
 
   @ApiProperty()
+  @Get('/:id')
+  @Render('')
+  async getOneClient(@Param('id') id: string) {
+    const oneClient = await this.appService.getOne(id);
+    return { oneClient };
+  }
+
+  @ApiProperty()
   @Patch('/clientEdit/:id')
   @Render('')
   async editClient(
@@ -133,8 +142,7 @@ export class AppController {
     @Body() createDto: CreateClientDto,
     @UploadedFile() avatar: Express.Multer.File,
   ) {
-    console.log(avatar + '555');
-    console.log(createDto)
+    console.log(avatar);
     const createClient = await this.appService.createClient(createDto);
     createClient.avatar = avatar.filename;
     const newClient = await this.appService.edit(createClient);

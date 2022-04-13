@@ -15,7 +15,6 @@ export class AppService {
   ) {}
 
   getFiltering(options: IPaginationOptions, filter: FilterDto) {
-    console.log(options.route);
     return from(
       this.clientRepository.findAndCount({
         skip: Number(options.page) * Number(options.limit) || 0,
@@ -58,14 +57,12 @@ export class AppService {
             totalPages: Math.ceil(totalClients / Number(options.limit)),
           },
         };
-        console.log(clientsPageable);
         return { clientsPageable };
       }),
     );
   }
 
   getAll(options: IPaginationOptions) {
-    console.log(options.route);
     return from(
       this.clientRepository.findAndCount({
         skip: Number(options.page) * Number(options.limit) || 0,
@@ -99,7 +96,6 @@ export class AppService {
             totalPages: Math.ceil(totalClients / Number(options.limit)),
           },
         };
-        console.log(clientsPageable);
         return { clientsPageable };
       }),
     );

@@ -8,18 +8,18 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <div class="modal-body">
-              <form action="" class="form" name="addClient" enctype='multipart/form-data'>
+              <form action="" id="formAdd" class="form" name="addClient" enctype='multipart/form-data'>
               
                 <div class="form-group circle" >
-                  <input type="file" class="upload" id="img" name="avatar" >
+                  <input type="file" class="upload" id="img" name="avatar" accept="image/*">
                 </div>
                 <div class="form-group">
                   <input type="text" class="form-control mb-3 " placeholder="name" name="name" id="clean">
-                  <input type="date" class="form-control mb-3 ml-3" placeholder="date" name="date" id="clean">
+                  <input type="text" class="form-control mb-3 ml-3" placeholder="yyyy-mm-dd" data-phone-pattern = "____-__-__" name="date" id="clean">
                 </div>
                 <div class="form-group">
                   <input type="text" class="form-control mb-3" placeholder="last name" name="lastName" id="clean">
-                  <input type="text" class="form-control mb-3 ml-3" id="clean" name="tel"placeholder="+380 (__) ___-__-__" data-phone-pattern = "+380 (__) ___-__-__">
+                  <input type="text" class="form-control mb-3 ml-3" id="clean" name="tel" placeholder="+380 (__) ___-__-__" data-phone-pattern = "+380 (__) ___-__-__">
                 </div> 
                 <div class="form-group">
                   <input type="email" class="form-control mb-3" placeholder="email" name="email" id="clean"> 
@@ -43,6 +43,35 @@
         clearVal = el.dataset.phoneClear,
         pattern = el.dataset.phonePattern,
         matrix_def = "+380(___) ___-__-__",
+        matrix = pattern ? pattern : matrix_def,
+        i = 0,
+        def = matrix.replace(/\D/g, ""),
+        val = e.target.value.replace(/\D/g, "");
+         
+        if (clearVal !== 'false' && e.type === 'blur') {
+            if (val.length < matrix.match(/([\_\d])/g).length) {
+                e.target.value = '';
+                return;
+            }
+        }
+        if (def.length >= val.length) val = def;
+        e.target.value = matrix.replace(/./g, function (a) {
+            return /[_\d]/.test(a) && i < val.length ? val.charAt(i++) : i >= val.length ? "" : a
+        });
+    }
+ 
+    var phone_inputs = document.querySelectorAll('[data-phone-pattern]');
+    for (let elem of phone_inputs) {
+        for (let ev of ['input', 'blur', 'focus']) {
+            elem.addEventListener(ev, eventCalllback);
+        }
+    }
+    var eventCalllback = function (e) {
+ 
+        var el = e.target,
+        clearVal = el.dataset.phoneClear,
+        pattern = el.dataset.phonePattern,
+        matrix_def = "____-__-__",
         matrix = pattern ? pattern : matrix_def,
         i = 0,
         def = matrix.replace(/\D/g, ""),

@@ -22,25 +22,102 @@
 {{> pagination}}
   </div>
  <script>
-   //ADD-CLIENT
-document.getElementById('submit').addEventListener('click', function (e) {
-  e.preventDefault();
-  addClient();
-});
 document.getElementById('limit').addEventListener('change', function (e) {
   e.preventDefault();
-  paginButtons();
-});
+  let path = getFilterPath() 
+  path += `limit=`+getLimit()+`&page=`+0
+  let request = new XMLHttpRequest();
+  request.open('GET', '/paginate' + path, true);
+  request.setRequestHeader('Content-Type', 'application/json');
+  request.send(path);
+  request.onload = function(){
+    let res = JSON.parse(request.response)
+    console.log(res.clientsPageable)
+    paginButtons(res.clientsPageable)
+    getCargs(res.clientsPageable.items);
+  }
+}); 
 document.getElementById('filter').addEventListener('click', function (e) {
   e.preventDefault();
   filtering()
 });
+var get = document.getElementsByClassName('edit_button');
+for (var i = 0; i < get.length; i++)
+  get[i].onclick = function () {
+    let client = JSON.stringify({ id: this.id });
+    let request = new XMLHttpRequest();
+    request.open('GET', '/' + this.id, true);
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.send(client);
+    request.onload = function () {
+      let res = $.parseJSON(request.response);
+      getOneInEditForm(res.oneClient);
+    };
+  };
 
 window.onload = function () {
   var inputs = document.querySelectorAll('input');
   for (var i = 0; i < inputs.length; i++) {
     inputs[i].value = '';
   }
+  firstLoad(); 
+};
+
+function getOneInEditForm(editClient) {
+  let form = '';
+  form += `<div class='form-group circle'>
+      <input type='file' class='upload' name='avatar' /> 
+    </div>
+    <img
+            src='http://localhost:3000/profileimagies/`+editClient.avatar+`'
+            style='width: 80px; height: 80px; object-fit: cover;'
+            class='rounded'
+          />
+    <div class='form-group'>
+      <input
+        type='text'
+        class='form-control mb-3'
+        value='`+editClient.name+`'
+        name='name'
+      />
+      <input
+        type='date'
+        class='form-control mb-3 ml-3'
+        value='`+editClient.date+`'
+        placeholder="yyyy-mm-dd"
+        data-mask="date"
+        name='date'
+      />
+    </div>
+    <div class='form-group'>
+      <input
+        type='text'
+        class='form-control mb-3'
+        value='`+editClient.lastName+`'
+        name='lastName'
+      />
+      <input
+        type='tel'
+        class='form-control mb-3 ml-3'
+        value='+380`+editClient.tel+`'
+        data-mask="phone"
+        placeholder="+380 (__) ___-__-__"
+        name='tel'
+      />
+    </div>
+    <div class='form-group'>
+      <input
+        type='email'
+        class='form-control mb-3'
+        value='`+editClient.email+`'
+        name='email'
+      />
+    </div>`
+  let l = document.getElementById('editForm');
+  l.innerHTML = form;
+}
+
+function firstLoad(){
   let client = '';
   let request = new XMLHttpRequest();
   request.open('GET', '/paginate', true);
@@ -48,71 +125,50 @@ window.onload = function () {
   request.send(client);
   request.onload = function () {
     let res = $.parseJSON(request.response);
-    console.log(res.clientsPageable)
     paginButtons(res.clientsPageable)
   };
-};
-
-
-
-
+}
 
 
   function getCargs(items) {
-    console.log('sxdctfvygbuhnijmk,cfvghbjnkmk,'+ items)
   let cards = '';
   for (let i = 0; i < items.length; i++) {
-    cards +=
-      ` <div class='card border-primary mb-2'>
+    cards +=`
+    <div class='card border-primary mb-2'>
       <div class='row'>
         <div class='col-md-3 text'>
 
           <img
-            src='http://localhost:3000/profileimagies/`+ items[i].avatar +
-      `'
+            src='http://localhost:3000/profileimagies/`+ items[i].avatar +`'
             style='width: 150px; height: 150px; object-fit: cover;'
             class='rounded'
           />
         </div>
-            
-            <div class='col-md-3 mt-3'>
-          <div class='text-default text mt-3'>` +
-      items[i].name +
-      ` ` +
-      items[i].lastName +
-      `
+
+        <div class='col-md-3 mt-3'>
+          <div class='text-default text mt-3'>`+ items[i].name +`
+            `+ items[i].lastName +`
           </div>
-          <div class='text-default text mt-2'>` +
-      items[i].date +
-      `</div>
+          <div class='text-default text mt-2'>`+ items[i].date +`</div>
         </div>
-         <div class='col-md-3 mt-3'>
-          <div class='text-default text mt-3'>` +
-      items[i].email +
-      `</div>
-          <div class='text-default text mt-2'>+380` +
-      items[i].tel +
-      `</div>
+        <div class='col-md-3 mt-3'>
+          <div class='text-default text mt-3'>`+ items[i].email +`</div>
+          <div class='text-default text mt-2'>+380`+ items[i].tel +`</div>
         </div>
-<div class='col-md-3 mt-3'>
+        {{! !!!!!!!!!!BUTTONS!!!!!!!!!!!! }}
+        <!-- кнопка редагувати -->
+        <div class='col-md-3 mt-3'>
           <button
             class='edit_button btn btn-outline-primary text mt-2'
             data-bs-toggle='modal'
             data-bs-target='#editModal'
-            style='width: 130px;'
-            id={{id}}
+            id='`+ items[i].id +`'
+            onclick="getForEdit(`+items[i].id +`)"
           > edit client </button>
           <br /><br />
           <!-- кнопка delete -->
-          <button
-            class='delete_button btn btn-outline-danger text'
-            id='` +
-      items[i].id +
-      `" onclick="delete1(` +
-      items[i].id +
-      `)">
-            style='width: 130px;'
-          >
+          <button class='delete_button btn btn-outline-danger text' id='`+ items[i].id +`'
+            onclick="delete1(`+items[i].id +`)">
             delete client
           </button>
         </div>
@@ -218,9 +274,6 @@ function getFilterPath(){
   request.setRequestHeader('Content-Type', 'application/json');
   request.send(path);
   request.onload = function(){
-    //document.open();
-    //document.write(request.response);
-    //document.close();
     console.log(request.response.clientsPageable)
     let res = JSON.parse(request.response)
     console.log(res.clientsPageable)
@@ -256,28 +309,34 @@ function delete1(id1) {
   request.send(client);
   request.onload = function () {
     console.log(request.response);
+    filtering()
+  };
+}
+function getForEdit(id1) {
+  let client = JSON.stringify({ id: id1 });
+  let request = new XMLHttpRequest();
+  request.open('GET', '/' + id1, true);
+  request.setRequestHeader('Content-Type', 'application/json');
+  request.send(client);
+  request.onload = function () {
+    let res = $.parseJSON(request.response);
+      getOneInEditForm(res.oneClient);
   };
 }
 
-//SCRIPT GET FOR EDIT
-var get = document.getElementsByClassName('edit_button');
-for (var i = 0; i < get.length; i++)
-  get[i].onclick = function () {
-    let client = JSON.stringify({ id: this.id });
-    let request = new XMLHttpRequest();
-  };
+
  //////////////////////////////////////////////////////////////////////////////
 
 
 
-function addClient(){
+document.getElementById('submit').addEventListener('click', function (e) {
+  e.preventDefault();
   let registerForm = document.forms['addClient'];
   let name = registerForm.elements['name'].value;
   let lastName = registerForm.elements['lastName'].value;
   let tel = registerForm.elements['tel'].value;
   let email = registerForm.elements['email'].value;
   let date = registerForm.elements['date'].value;
-  var input = document.getElementById('img');
   let data = new FormData();
   data.append('name', name);
   data.append('lastName', lastName);
@@ -314,8 +373,9 @@ function addClient(){
   var inputs = document.querySelectorAll('input');
   for (var i = 0; i < inputs.length; i++) {
     inputs[i].value = '';
-  }
-}
+  
+
+});
 
 </script>
 <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>

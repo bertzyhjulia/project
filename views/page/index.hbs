@@ -22,6 +22,10 @@
 {{> pagination}}
   </div>
  <script>
+document.getElementById('submit').addEventListener('click', function (e) {
+  e.preventDefault();
+  clientAdd()
+});
 document.getElementById('limit').addEventListener('change', function (e) {
   e.preventDefault();
   let path = getFilterPath() 
@@ -66,13 +70,14 @@ window.onload = function () {
 function getOneInEditForm(editClient) {
   let form = '';
   form += `<div class='form-group circle'>
-      <input type='file' class='upload' name='avatar' /> 
+      <input type='file' class='upload' name='avatar' class='rounded avatar' /> 
     </div>
     <img
-            src='http://localhost:3000/profileimagies/`+editClient.avatar+`'
-            style='width: 80px; height: 80px; object-fit: cover;'
-            class='rounded'
-          />
+      src='http://localhost:3000/profileimagies/`+editClient.avatar+`'
+      style='width: 80px; height: 80px; object-fit: cover;'
+      class='rounded avatar'
+      id='img'
+    />
     <div class='form-group'>
       <input
         type='text'
@@ -115,6 +120,10 @@ function getOneInEditForm(editClient) {
     </div>`
   let l = document.getElementById('editForm');
   l.innerHTML = form;
+document.getElementById('edit').addEventListener('click', function (e) {
+  e.preventDefault();
+  clientEdit(editClient.id)
+});
 }
 
 function firstLoad(){
@@ -329,54 +338,73 @@ function getForEdit(id1) {
 
 
 
-document.getElementById('submit').addEventListener('click', function (e) {
-  e.preventDefault();
+
+function clientAdd(){
   let registerForm = document.forms['addClient'];
   let name = registerForm.elements['name'].value;
   let lastName = registerForm.elements['lastName'].value;
   let tel = registerForm.elements['tel'].value;
+  tel = tel.replace('+','')
+  tel = tel.replace(/\-/g,'')
+  tel = tel.replace('(','')
+  tel = tel.replace(')',"")
+  tel = tel.replace(/\s/g,'')
+  tel = tel.toString().slice(3)
+  console.log(tel)
   let email = registerForm.elements['email'].value;
   let date = registerForm.elements['date'].value;
-  let data = new FormData();
-  data.append('name', name);
-  data.append('lastName', lastName);
-  data.append('tel', tel);
-  data.append('email', email);
-  data.append('date', date);
-  data.append('avatar', input.files[0]);
-  let data_body =
-    '&name=' +
-    name +
-    '&lastName=' +
-    lastName +
-    '&tel=' +
-    tel +
-    '&email=' +
-    email +
-    '&date=' +
-    date;
-    console.log('data '+ data)
-  fetch('clientAdd', {
-    method: 'POST',
-    body: data,
-    contentType: 'multipart/form-data',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-  })
-    .then((response) => {
-      if (response.status !== 200) {
-        return Promise.reject();
-      }
-      return response.text();
-    })
-    .then((i) => console.log(i))
-    .catch(() => filtering());
+  var formData = new FormData();
+  console.log(document.getElementById("img").files[0])
+    formData.append("avatar", document.getElementById("img").files[0], document.getElementById("img").files[0].name);
+    formData.append('name', name);
+    formData.append('lastName', lastName);
+    formData.append('tel', tel);
+    formData.append('email', email);
+    formData.append('date', date);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/clientAdd", true);
+    xhr.send(formData);
+    xhr.onload = function () {
+      filtering()
+  };
   var inputs = document.querySelectorAll('input');
   for (var i = 0; i < inputs.length; i++) {
-    inputs[i].value = '';
-  
+    inputs[i].value = '';}
+  }
 
-});
 
+function clientEdit(id){
+  let registerForm = document.forms['editForm'];
+  let name = registerForm.elements['name'].value;
+  let lastName = registerForm.elements['lastName'].value;
+  let tel = registerForm.elements['tel'].value;
+  tel = tel.replace('+','')
+  tel = tel.replace(/\-/g,'')
+  tel = tel.replace('(','')
+  tel = tel.replace(')',"")
+  tel = tel.replace(/\s/g,'')
+  tel = tel.toString().slice(3)
+  console.log(tel)
+  let email = registerForm.elements['email'].value;
+  let date = registerForm.elements['date'].value;
+  var formData = new FormData();
+  //console.log(document.getElementById("editImg").files[0])
+    formData.append("avatar", document.getElementsByClassName("avatar").files[0], document.getElementsByClassName("avatar").files[0].name);
+    formData.append('name', name);
+    formData.append('lastName', lastName);
+    formData.append('tel', tel);
+    formData.append('email', email);
+    formData.append('date', date);
+    var xhr = new XMLHttpRequest();
+    xhr.open("PATCH", "/edit" + id, true);
+    xhr.send(formData);
+    xhr.onload = function () {
+      filtering()
+  };
+  var inputs = document.querySelectorAll('input');
+  for (var i = 0; i < inputs.length; i++) {
+    inputs[i].value = '';}
+  }
 </script>
 <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>

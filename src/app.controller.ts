@@ -17,11 +17,10 @@ import { ApiProperty, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import path = require('path');
 import { AppService } from './app.service';
-import { CreateClientDto } from './client.dto';
+import { CreateClientDto, EditClientDto } from './client.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { of } from 'rxjs';
 import { join } from 'path';
-import { threadId } from 'worker_threads';
 
 export const storage = {
   storage: diskStorage({
@@ -112,23 +111,6 @@ export class AppController {
   }
 
   @ApiProperty()
-  @Patch('/clientEdit/:id')
-  @Render('')
-  async editClient(
-    @Param('id') id: string,
-    @Body() { name, lastName, tel, email, date },
-  ) {
-    const client = await this.appService.getOne(id);
-    client.name = name;
-    client.lastName = lastName;
-    client.tel = tel;
-    client.email = email;
-    client.date = date;
-    const editClient = await this.appService.edit(client);
-    return { editClient };
-  }
-
-  @ApiProperty()
   @Delete('/delete:id')
   @Render('')
   async deleteClient(@Param('id') id: string) {
@@ -142,7 +124,6 @@ export class AppController {
     @Body() createDto: CreateClientDto,
     @UploadedFile() avatar: Express.Multer.File,
   ) {
-    console.log(avatar);
     const createClient = await this.appService.createClient(createDto);
     createClient.avatar = avatar.filename;
     const newClient = await this.appService.edit(createClient);
@@ -150,20 +131,21 @@ export class AppController {
   }
 
   @ApiProperty()
-  @Patch('edit/:id')
+  @Patch('edit:id')
   @UseInterceptors(FileInterceptor('avatar', storage))
   async uploadFile1(
     @Param('id') id: string,
-    @Body() { name, lastName, tel, email, date },
+    @Body() editDto: EditClientDto,
     @UploadedFile() avatar: Express.Multer.File,
   ) {
     const client = await this.appService.getOne(id);
-    client.name = name;
-    client.lastName = lastName;
-    client.tel = tel;
-    client.email = email;
-    client.date = date;
+    client.name = editDto.name;
+    client.lastName = editDto.lastName;
+    client.tel = editDto.tel;
+    client.email = editDto.email;
+    client.date = editDto.date;
     client.avatar = avatar.path;
+    console.log(client);
     const editClient = await this.appService.edit(client);
     return { editClient };
   }

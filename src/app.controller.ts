@@ -41,10 +41,10 @@ export class AppController {
   @ApiProperty()
   @Get('/')
   @Render('page/index')
-  get() {
+  get(@Query('page') page = 0, @Query('limit') limit = 2) {
     return this.appService.getAll({
-      page: 0,
-      limit: 2,
+      page: Number(page),
+      limit: Number(limit),
       route: 'http://localhost:3000/paginate',
     });
   }
@@ -131,9 +131,28 @@ export class AppController {
   }
 
   @ApiProperty()
-  @Patch('edit:id')
+  @Patch('editWithoutAvatar:id')
   @UseInterceptors(FileInterceptor('avatar', storage))
-  async uploadFile1(
+  async editWithoutAvatar(
+    @Param('id') id: string,
+    @Body() editDto: EditClientDto,
+  ) {
+    console.log(editDto);
+    const client = await this.appService.getOne(id);
+    client.name = editDto.name;
+    client.lastName = editDto.lastName;
+    client.tel = editDto.tel;
+    client.email = editDto.email;
+    client.date = editDto.date;
+    console.log(client);
+    const editClient = await this.appService.edit(client);
+    return { editClient };
+  }
+
+  @ApiProperty()
+  @Patch('editWithAvatar:id')
+  @UseInterceptors(FileInterceptor('avatar', storage))
+  async editWithAvatar(
     @Param('id') id: string,
     @Body() editDto: EditClientDto,
     @UploadedFile() avatar: Express.Multer.File,
@@ -144,7 +163,7 @@ export class AppController {
     client.tel = editDto.tel;
     client.email = editDto.email;
     client.date = editDto.date;
-    client.avatar = avatar.path;
+    client.avatar = avatar.filename;
     console.log(client);
     const editClient = await this.appService.edit(client);
     return { editClient };

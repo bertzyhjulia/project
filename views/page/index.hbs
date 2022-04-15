@@ -64,18 +64,19 @@ window.onload = function () {
   for (var i = 0; i < inputs.length; i++) {
     inputs[i].value = '';
   }
+  document.getElementById('limit').value = 2
   firstLoad(); 
 };
 
 function getOneInEditForm(editClient) {
   let form = '';
   form += `<div class='form-group circle'>
-      <input type='file' class='upload' name='avatar' class='rounded avatar' /> 
+      <input type='file' class='upload' name='avatar' onchange = 'getImgEdit()' id='editImg' class='rounded avatar' /> 
     </div>
-    <img
+    <img 
       src='http://localhost:3000/profileimagies/`+editClient.avatar+`'
       style='width: 80px; height: 80px; object-fit: cover;'
-      class='rounded avatar'
+      class='rounded'
       id='img'
     />
     <div class='form-group'>
@@ -89,7 +90,8 @@ function getOneInEditForm(editClient) {
         type='date'
         class='form-control mb-3 ml-3'
         value='`+editClient.date+`'
-        placeholder="yyyy-mm-dd"
+        placeholder="yyyy-mm-dd" 
+        data-phone-pattern = "____-__-__"
         data-mask="date"
         name='date'
       />
@@ -122,14 +124,24 @@ function getOneInEditForm(editClient) {
   l.innerHTML = form;
 document.getElementById('edit').addEventListener('click', function (e) {
   e.preventDefault();
-  clientEdit(editClient.id)
+  if(getImgEdit()){
+        console.log('   clientEdit(editClient.id)}')
+  clientEditWithAvatar(editClient.id)}
+  else{
+    console.log('   clientEdit(editClient.id)}')
+   clientEdit(editClient.id)}
 });
+}
+
+function getImgEdit(){
+  return document.getElementById("editImg").files[0]
 }
 
 function firstLoad(){
   let client = '';
+  let path = '?page=0&limit='+getLimit()
   let request = new XMLHttpRequest();
-  request.open('GET', '/paginate', true);
+  request.open('GET', '/paginate' + path, true);
   request.setRequestHeader('Content-Type', 'application/json');
   request.send(client);
   request.onload = function () {
@@ -373,7 +385,8 @@ function clientAdd(){
   }
 
 
-function clientEdit(id){
+function clientEditWithAvatar(id){
+  console.log('http://localhost:3000/profileimagies/'+img)
   let registerForm = document.forms['editForm'];
   let name = registerForm.elements['name'].value;
   let lastName = registerForm.elements['lastName'].value;
@@ -387,16 +400,47 @@ function clientEdit(id){
   console.log(tel)
   let email = registerForm.elements['email'].value;
   let date = registerForm.elements['date'].value;
+  let avatar = getImgEdit();
   var formData = new FormData();
-  //console.log(document.getElementById("editImg").files[0])
-    formData.append("avatar", document.getElementsByClassName("avatar").files[0], document.getElementsByClassName("avatar").files[0].name);
+    formData.append("avatar", avatar, avatar.name);
     formData.append('name', name);
     formData.append('lastName', lastName);
     formData.append('tel', tel);
     formData.append('email', email);
     formData.append('date', date);
     var xhr = new XMLHttpRequest();
-    xhr.open("PATCH", "/edit" + id, true);
+    xhr.open("PATCH", "/editWithAvatar" + id, true);
+    xhr.send(formData);
+    xhr.onload = function () {
+      filtering()
+  };
+  var inputs = document.querySelectorAll('input');
+  for (var i = 0; i < inputs.length; i++) {
+    inputs[i].value = '';}
+  }
+
+function clientEdit(id){
+  let registerForm = document.forms['editForm'];
+  let name = registerForm.elements['name'].value;
+  let lastName = registerForm.elements['lastName'].value;
+  let tel = registerForm.elements['tel'].value;
+  tel = tel.replace('+','')
+  tel = tel.replace(/\-/g,'')
+  tel = tel.replace('(','')
+  tel = tel.replace(')',"")
+  tel = tel.replace(/\s/g,'')
+  tel = tel.toString().slice(3)
+  let email = registerForm.elements['email'].value;
+  let date = registerForm.elements['date'].value;
+  var formData = new FormData();
+    formData.append('name', name);
+    formData.append('lastName', lastName);
+    formData.append('tel', tel);
+    formData.append('email', email);
+    formData.append('date', date);
+    var xhr = new XMLHttpRequest();
+    console.log(formData)
+    xhr.open("PATCH", "/editWithoutAvatar" + id, true);
     xhr.send(formData);
     xhr.onload = function () {
       filtering()
